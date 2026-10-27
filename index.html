@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bon Voyage | Check the weather before you go</title>
+<meta name="description" content="Check the current weather and 7-day forecast for any destination, with rain, UV and snow indexes, before you book your stay.">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cobalt:#3d5fa8; --cobalt-soft:#dce6f6; --cobalt-deep:#27407a;
+  --sage:#a8c0a0; --sage-soft:#e2ecde; --sage-deep:#4e6b48;
+  --mustard:#e2b13c; --mustard-soft:#f8ecc4;
+  --ink:#1f2a44; --paper:#f6f8f3;
+  --font:"Nunito","Trebuchet MS",Verdana,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;font:17px/1.6 var(--font);color:var(--ink);background:var(--paper);position:relative;overflow-x:hidden}
+.doodles{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.55}
+.doodles svg{position:absolute;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.wrap{position:relative;z-index:1;max-width:880px;margin:0 auto;padding:28px 18px 40px}
+h1{font-size:clamp(2.6rem,9vw,4.4rem);margin:12px 0 6px;color:var(--cobalt-deep);line-height:1.05}
+h2{font-size:1.35rem;margin:0 0 10px;color:var(--cobalt-deep)}
+.sub{color:#4a5675;max-width:52ch;margin:0 0 20px}
+.card{background:#fff;border:3px solid var(--cobalt-soft);border-radius:28px;padding:20px;margin:18px 0}
+form{display:flex;gap:10px;flex-wrap:wrap}
+input{flex:1 1 220px;font:inherit;padding:12px 18px;border:3px solid var(--sage);border-radius:999px;background:var(--sage-soft);color:var(--ink)}
+button{font:inherit;cursor:pointer}
+.go{padding:12px 26px;border:0;border-radius:999px;background:var(--mustard);color:var(--ink);font-weight:800}
+:focus-visible{outline:3px solid var(--cobalt);outline-offset:3px}
+.msg{margin:12px 0 0;color:#8a3b2a;min-height:1.4em}
+.hidden{display:none}
+.now{display:flex;flex-wrap:wrap;gap:8px 28px;align-items:center;background:var(--cobalt-soft);border-radius:24px;padding:16px 20px}
+.temp{font-size:3.2rem;font-weight:800;color:var(--cobalt-deep);line-height:1}
+.facts{color:#3a4668}
+.icons{display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 8px}
+.ico{display:flex;flex-direction:column;align-items:center;gap:2px;padding:12px 18px;border:3px solid var(--sage);border-radius:24px;background:var(--sage-soft);font-weight:700;color:var(--sage-deep);min-width:96px}
+.ico svg{width:44px;height:44px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.ico[aria-pressed=true]{background:var(--mustard-soft);border-color:var(--mustard);color:var(--ink)}
+#panel{background:var(--mustard-soft);border-radius:24px;padding:16px 20px;min-height:90px}
+#panel .big{font-size:2.2rem;font-weight:800;line-height:1.1}
+.mini{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:4px}
+.mini div{flex:0 0 auto;background:#fff;border-radius:16px;padding:6px 12px;text-align:center;font-size:.9rem}
+.days{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:10px}
+.day{background:var(--sage-soft);border-radius:22px;padding:12px 8px;text-align:center}
+.day b{display:block}.day .e{font-size:1.7rem}
+.read{background:var(--sage-soft);border-radius:22px;padding:14px 18px;margin-top:14px}
+.stay{display:flex;gap:12px;flex-wrap:wrap}
+.stay a{flex:1 1 180px;text-align:center;padding:14px;border-radius:999px;background:var(--cobalt);color:#fff;font-weight:800;text-decoration:none}
+.stay a:nth-child(2){background:var(--sage-deep)}
+.stay a:nth-child(3){background:var(--mustard);color:var(--ink)}
+footer{margin-top:30px;padding-top:14px;border-top:3px dotted var(--sage);color:#4a5675;font-size:.95rem}
+</style>
+</head>
+<body>
+
+<div class="doodles" aria-hidden="true">
+  <svg style="top:3%;left:4%" width="46" height="46" viewBox="0 0 46 46" stroke="#e2b13c"><circle cx="23" cy="23" r="8"/><path d="M23 4v6M23 36v6M4 23h6M36 23h6M9 9l4 4M33 33l4 4M37 9l-4 4M13 33l-4 4"/></svg>
+  <svg style="top:10%;right:6%" width="40" height="46" viewBox="0 0 40 46" stroke="#3d5fa8"><path d="M20 4C12 16 8 22 8 29a12 12 0 0024 0c0-7-4-13-12-25z"/></svg>
+  <svg style="top:34%;left:2%" width="50" height="50" viewBox="0 0 50 50" stroke="#4e6b48"><path d="M8 42C8 20 22 8 42 8c0 20-12 34-34 34zM8 42L30 20"/></svg>
+  <svg style="top:52%;right:3%" width="46" height="46" viewBox="0 0 46 46" stroke="#3d5fa8"><path d="M14 8l-4 10M24 8l-4 10M34 8l-4 10M10 26l-4 10M20 26l-4 10M30 26l-4 10"/></svg>
+  <svg style="top:72%;left:5%" width="46" height="46" viewBox="0 0 46 46" stroke="#e2b13c"><circle cx="23" cy="23" r="7"/><path d="M23 6v5M23 35v5M6 23h5M35 23h5M11 11l3 3M32 32l3 3M35 11l-3 3M14 32l-3 3"/></svg>
+  <svg style="top:88%;right:8%" width="50" height="50" viewBox="0 0 50 50" stroke="#4e6b48"><path d="M8 42C8 20 22 8 42 8c0 20-12 34-34 34zM8 42L30 20"/></svg>
+</div>
+
+<div class="wrap">
+  <header>
+    <h1><strong>Bon voyage</strong></h1>
+    <p class="sub">Check the weather at your destination first. Then plan your days and book your stay around it.</p>
+  </header>
+
+  <main>
+    <section class="card" aria-label="Search a destination">
+      <form id="f">
+        <input id="q" type="text" placeholder="Try Manali, Goa, Paris, Tokyo" aria-label="City or place" required>
+        <button class="go" type="submit">Check weather</button>
+      </form>
+      <p class="msg" id="msg" role="status"></p>
+    </section>
+
+    <section id="result" class="card hidden" aria-label="Weather results">
+      <h2 id="place"></h2>
+      <div class="now">
+        <span class="temp" id="temp"></span>
+        <div class="facts" id="facts"></div>
+      </div>
+
+      <div class="icons" role="group" aria-label="Weather indexes. Tap an icon to see its index.">
+        <button class="ico" id="bRain" aria-pressed="false" type="button">
+          <svg viewBox="0 0 48 48"><path d="M14 30a9 9 0 011-18 11 11 0 0120 3 8 8 0 01-2 15H14z"/><path d="M16 36l-2 5M24 36l-2 5M32 36l-2 5"/></svg>Rain</button>
+        <button class="ico" id="bUv" aria-pressed="false" type="button">
+          <svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="8"/><path d="M24 6v6M24 36v6M6 24h6M36 24h6M11 11l4 4M33 33l4 4M37 11l-4 4M15 33l-4 4"/></svg>UV</button>
+        <button class="ico" id="bSnow" aria-pressed="false" type="button">
+          <svg viewBox="0 0 48 48"><path d="M24 6v36M8 15l32 18M40 15L8 33M20 9l4 4 4-4M20 39l4-4 4 4"/></svg>Snow</button>
+      </div>
+      <div id="panel" aria-live="polite"><p style="margin:0">Tap the cloud, sun or snowflake to see its index.</p></div>
+
+      <h2 style="margin-top:22px">Next 7 days</h2>
+      <div class="days" id="days"></div>
+      <div class="read" id="read"></div>
+    </section>
+
+    <section id="stay" class="card hidden" aria-label="Book your stay">
+      <h2>Weather checked? Find your stay.</h2>
+      <div class="stay">
+        <a href="https://www.booking.com" target="_blank" rel="noopener">Booking.com</a>
+        <a href="https://www.goibibo.com" target="_blank" rel="noopener">Goibibo</a>
+        <a href="https://www.makemytrip.com" target="_blank" rel="noopener">MakeMyTrip</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>Made by Avika Gupta, roll no. 77, Section AK. Weather data from Open-Meteo.</footer>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+let W = null, active = null;
+
+const CODES = {0:["Clear sky","☀️"],1:["Mostly clear","🌤️"],2:["Partly cloudy","⛅"],3:["Overcast","☁️"],
+  45:["Fog","🌫️"],48:["Fog","🌫️"],51:["Light drizzle","🌦️"],53:["Drizzle","🌦️"],55:["Heavy drizzle","🌧️"],
+  61:["Light rain","🌦️"],63:["Rain","🌧️"],65:["Heavy rain","🌧️"],71:["Light snow","🌨️"],73:["Snow","❄️"],75:["Heavy snow","❄️"],
+  77:["Snow grains","❄️"],80:["Rain showers","🌦️"],81:["Rain showers","🌧️"],82:["Violent showers","⛈️"],
+  85:["Snow showers","🌨️"],86:["Snow showers","🌨️"],95:["Thunderstorm","⛈️"],96:["Thunderstorm, hail","⛈️"],99:["Thunderstorm, hail","⛈️"]};
+const wmo = c => CODES[c] || ["Mixed","🌥️"];
+
+const rainLabel = p => p < 30 ? "Low" : p < 60 ? "Moderate" : "High";
+const uvLabel   = u => u < 3 ? "Low" : u < 6 ? "Moderate" : u < 8 ? "High" : u < 11 ? "Very high" : "Extreme";
+const snowLabel = s => s <= 0 ? "None" : s < 2 ? "Light" : s < 10 ? "Moderate" : "Heavy";
+const dayName = (d, i) => i === 0 ? "Today" : new Date(d + "T00:00").toLocaleDateString(undefined, {weekday:"short"});
+
+const METRICS = {
+  rain: { title:"Rain index", main:(d,i)=>d.precipitation_probability_max[i]+"%", label:i=>rainLabel(d_(i,"precipitation_probability_max")),
+          note:i=>"chance of rain, "+d_(i,"precipitation_sum")+" mm expected", mini:i=>d_(i,"precipitation_probability_max")+"%" },
+  uv:   { title:"UV index", main:(d,i)=>String(Math.round(d.uv_index_max[i])), label:i=>uvLabel(d_(i,"uv_index_max")),
+          note:i=>"peak UV for the day", mini:i=>String(Math.round(d_(i,"uv_index_max"))) },
+  snow: { title:"Snowing index", main:(d,i)=>d.snowfall_sum[i]+" cm", label:i=>snowLabel(d_(i,"snowfall_sum")),
+          note:i=>"expected snowfall", mini:i=>d_(i,"snowfall_sum")+" cm" }
+};
+const d_ = (i, k) => W.daily[k][i];
+
+function showMetric(key){
+  active = key;
+  const m = METRICS[key];
+  [["rain","bRain"],["uv","bUv"],["snow","bSnow"]].forEach(([k,id]) => $(id).setAttribute("aria-pressed", k === key));
+  const p = $("panel"); p.textContent = "";
+  const t = document.createElement("div");
+  t.innerHTML = "<strong></strong><div class='big'></div><div></div>";
+  t.children[0].textContent = m.title + " for today";
+  t.children[1].textContent = m.main(W.daily, 0) + " · " + m.label(0);
+  t.children[2].textContent = m.note(0);
+  p.appendChild(t);
+  const row = document.createElement("div"); row.className = "mini";
+  W.daily.time.forEach((d, i) => {
+    const c = document.createElement("div");
+    c.textContent = dayName(d, i) + " " + m.mini(i);
+    row.appendChild(c);
+  });
+  p.appendChild(row);
+}
+
+function travelRead(){
+  const D = W.daily, n = D.time.length;
+  const avgRain = D.precipitation_probability_max.reduce((a,b)=>a+b,0)/n;
+  const maxUv = Math.max(...D.uv_index_max), snow = D.snowfall_sum.reduce((a,b)=>a+b,0);
+  const tips = [];
+  tips.push(avgRain >= 60 ? "A wet week ahead. Pack a rain jacket and keep indoor plans ready."
+          : avgRain >= 30 ? "Some rain likely. Carry a light umbrella and stay flexible on outdoor days."
+          : "Mostly dry. Good for outdoor plans.");
+  if (maxUv >= 6) tips.push("UV gets high (peak " + Math.round(maxUv) + "). Plan outdoor time before late morning or after afternoon, and use sunscreen.");
+  if (snow > 0) tips.push("Snow is forecast (" + snow.toFixed(1) + " cm in total). Check road and transport conditions before travelling.");
+  $("read").textContent = tips.join(" ");
+}
+
+function render(name){
+  const c = W.current, [desc, em] = wmo(c.weather_code);
+  $("place").textContent = name;
+  $("temp").textContent = Math.round(c.temperature_2m) + "°C";
+  $("facts").textContent = em + " " + desc + " · Feels like " + Math.round(c.apparent_temperature) + "°C · Humidity " + c.relative_humidity_2m + "% · Wind " + Math.round(c.wind_speed_10m) + " km/h";
+  const D = W.daily, box = $("days"); box.textContent = "";
+  D.time.forEach((d, i) => {
+    const [dd, ee] = wmo(D.weather_code[i]);
+    const el = document.createElement("div"); el.className = "day";
+    el.innerHTML = "<b></b><span class='e'></span><div></div><small></small>";
+    el.children[0].textContent = dayName(d, i);
+    el.children[1].textContent = ee; el.children[1].setAttribute("title", dd);
+    el.children[2].textContent = Math.round(D.temperature_2m_max[i]) + "° / " + Math.round(D.temperature_2m_min[i]) + "°";
+    el.children[3].textContent = "Rain " + D.precipitation_probability_max[i] + "%";
+    box.appendChild(el);
+  });
+  travelRead();
+  $("result").classList.remove("hidden");
+  $("stay").classList.remove("hidden");
+  showMetric(active || "rain");
+}
+
+$("f").addEventListener("submit", async e => {
+  e.preventDefault();
+  const raw = $("q").value.trim(); if (!raw) return;
+  const parts = raw.split(",").map(s => s.trim()).filter(Boolean);
+  $("msg").textContent = "Checking the weather…";
+  let g;
+  try {
+    g = await (await fetch("https://geocoding-api.open-meteo.com/v1/search?count=10&name=" + encodeURIComponent(parts[0]))).json();
+  } catch (err) {
+    $("msg").textContent = "Could not reach the place-search service. Check your internet and open this page in a normal browser tab, not a preview window.";
+    return;
+  }
+  if (!g.results || !g.results.length) {
+    $("msg").textContent = "No place found for \"" + parts[0] + "\". Check the spelling or try a nearby city.";
+    return;
+  }
+  const hints = parts.slice(1).map(h => h.toLowerCase());
+  const p = (hints.length && g.results.find(x => {
+    const full = [x.admin1, x.admin2, x.country].filter(Boolean).join(" ").toLowerCase();
+    return hints.some(h => full.includes(h));
+  })) || g.results[0];
+  try {
+    const url = "https://api.open-meteo.com/v1/forecast?latitude=" + p.latitude + "&longitude=" + p.longitude +
+      "&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m" +
+      "&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,precipitation_sum,uv_index_max,snowfall_sum" +
+      "&timezone=auto&forecast_days=7";
+    W = await (await fetch(url)).json();
+    if (W.error || !W.current) { $("msg").textContent = "The weather service returned an error: " + (W.reason || "no data"); return; }
+    $("msg").textContent = "";
+    render([p.name, p.admin1, p.country].filter(Boolean).join(", "));
+  } catch (err) {
+    $("msg").textContent = "Found the place but could not load its weather. Check your internet connection and try again.";
+  }
+});
+$("bRain").addEventListener("click", () => W && showMetric("rain"));
+$("bUv").addEventListener("click", () => W && showMetric("uv"));
+$("bSnow").addEventListener("click", () => W && showMetric("snow"));
+</script>
+</body>
+</html>
